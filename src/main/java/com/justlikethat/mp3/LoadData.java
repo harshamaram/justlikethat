@@ -1,11 +1,55 @@
 package com.justlikethat.mp3;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 public class LoadData {
 	
 	public static Map<String, String> data = new HashMap<String, String>();
+	
+	public void readData() {
+
+		try {
+			FileInputStream excelFile = new FileInputStream(new File("input_data.xls"));
+			Workbook workbook = new HSSFWorkbook(excelFile);
+			Sheet datatypeSheet = workbook.getSheetAt(0);
+			Iterator<Row> iterator = datatypeSheet.iterator();
+			String str1, str2;
+			
+			while (iterator.hasNext()) {
+
+				Row currentRow = iterator.next();
+				Cell cell1 = currentRow.getCell(0, Row.RETURN_BLANK_AS_NULL);
+				Cell cell2 = currentRow.getCell(1, Row.RETURN_BLANK_AS_NULL);
+				if(cell1 == null || cell2 == null) {
+					continue;
+				}
+				
+				str1 = cell1.getStringCellValue();
+				str2 = cell1.getStringCellValue();
+
+				data.put(str1, str2);
+
+			}
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	/*
 	static {
 			data.put("1942 - A Love Story","R D Burman");
 			data.put("3 Idiots","Shantanu Moitra");
@@ -325,5 +369,5 @@ public class LoadData {
 			data.put("Yuva","A R Rahman");
 			
 	}
-
-}
+//*/
+	}

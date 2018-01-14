@@ -1,17 +1,19 @@
 package com.justlikethat.mp3.excel;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.read.biff.BiffException;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -24,194 +26,155 @@ import org.jaudiotagger.tag.TagException;
 
 import com.justlikethat.mp3.Constants;
 import com.justlikethat.mp3.LoadData;
+import com.justlikethat.mp3.bean.TrackMetaData;
 
 public class Work implements Constants{
 	public static StringBuffer sb = new StringBuffer();
 	public static String fileName;
 	public static String albumName;
 	public static String artistName;
+	public static String trackName;
 	public static String path;
 	
+	public static Workbook workBook;
 	public static Sheet sheet;
 	
-	public static int count = 0;
+	private static List<TrackMetaData> existingTrackList = new ArrayList<TrackMetaData>();
 	
-	public static void main3(String s[]) {
-		File folder = new File("C:\\Users\\Hello\\Music");
-		recurrentProcess(folder);
+	public static void main(String s[]) {
+		File folder = new File("D:\\documents\\music");
+		initializeWorkBook();
+		recursiveExtract(folder);
+		writeDataToSheet();
 		System.out.println("-- end --");
 	}
 	
-	public static void main(String s[]) {
+	public static void main3(String s[]) {
 		
-		File folder = new File("C:\\Users\\Hello\\Music\\Hindi");
-		printFileList(folder);
+		LoadData data = new LoadData();
+		data.readData();
+		for (Map.Entry<String, String> entry : LoadData.data.entrySet()) {
+			System.out.println(entry.getKey() + " / " + entry.getValue());
+		}
 	}
 	
-	public static void main1(String s[]) {
+	static void initializeWorkBook() {
 		try {
-			
-			readExcel();
-			
-		} catch (BiffException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+	        workBook = new HSSFWorkbook();
+	        sheet = workBook.createSheet("MetadataInfo");
+
+	        sheet.setColumnWidth(0, 30*256);
+	        sheet.setColumnWidth(1, 50*256);
+	        sheet.setColumnWidth(2, 5*256);
+	        sheet.setColumnWidth(3, 30*256);
+	        sheet.setColumnWidth(4, 40*256);
+	        sheet.setColumnWidth(5, 50*256);
+	        
+	        Row titleRow = sheet.createRow(0);
+	        titleRow.setHeightInPoints(45);
+	        Cell cell;
+	        int count = 0;
+	        for(Constants.METADATA metadata : Constants.METADATA.values()) {
+	        	
+	        	cell = titleRow.createCell(count);
+	        	cell.setCellValue(metadata.name());
+	        	count++;
+	        }
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static void readExcel() throws BiffException, IOException {
-		Sheet sheet = getWorkSheet();
-		System.out.println("--");
-		Cell a1 = sheet.getCell(1,0);
-		Cell b2 = sheet.getCell(1,1);
-		
-		String stringa1 = a1.getContents();
-		String stringb2 = b2.getContents();
-		
-		System.out.println(stringa1);
-		System.out.println(stringb2);
-		System.out.println("--");
-		
-	}
-	
-	public static Sheet getWorkSheet() throws IOException, BiffException {
-		if(sheet == null) {
-			Workbook workbook = Workbook.getWorkbook(new File("data.xls"));
-			sheet = workbook.getSheet(1); 
-		} 
-		return sheet; 
-	}
-	
-	public static void main2(String s[]) {
+	static void writeDataToSheet() {
 		try {
 			
-			WritableWorkbook workbook = Workbook.createWorkbook(new File("output.xls"));
-			WritableSheet sheet = workbook.createSheet("metadata", 0);
+			Cell cell;
+			int count = 1;
+			for(TrackMetaData data : existingTrackList) {
+				System.out.println(data);
+				Row row = sheet.createRow(count);
+				cell = row.createCell(0);
+				cell.setCellValue(data.getAlbum());
+				cell = row.createCell(1);
+				cell.setCellValue(data.getTitle());
+				cell = row.createCell(2);
+				cell.setCellValue(data.getTrack());
+				cell = row.createCell(3);
+				cell.setCellValue(data.getArtist());
+				cell = row.createCell(4);
+				cell.setCellValue(data.getGenre());
+				cell = row.createCell(5);
+				cell.setCellValue(data.getYear());
+				cell = row.createCell(6);
+				cell.setCellValue(data.getOriginalFileName());
+				cell = row.createCell(7);
+				cell.setCellValue(data.getOriginalFolderName());
+				count++;
+			}
 			
-			Label label = new Label(0, 1, "A label record"); 
-			sheet.addCell(label); 
-			
-			Number number = new Number(0, 2, 3.1459); 
-			sheet.addCell(number);
-			
-			workbook.write(); 
-			workbook.close();
-			
+			String file = "current_track_data_" + getTimestamp() + ".xls";
+	        FileOutputStream out = new FileOutputStream(file);
+	        workBook.write(out);
+	        out.close();
 			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public static void recurrentProcess(File folder) {
-		try {
-			WritableWorkbook workbook = Workbook.createWorkbook(new File("output.xls"));
-			WritableSheet sheet = workbook.createSheet("First Sheet", 0);
-			int count = 0;
-			
-			Label nameLabel = new Label(FILE_NAME, count, "NAME"); 
-			Label folderLabel = new Label(FOLDER_NAME, count, "FOLDER"); 
-			Label albumLabel = new Label(ALBUM, count, "ALBUM"); 
-			Label titleLabel = new Label(TITLE, count, "TITLE");
-			Label trackLabel = new Label(TRACK, count, "TRACK");
-			Label artistLabel = new Label(ARTIST, count, "ARTIST");
-			Label genreLabel = new Label(GENRE, count, "GENRE");
-			Label yearLabel = new Label(YEAR, count, "YEAR");
-			
-			sheet.addCell(nameLabel);
-			sheet.addCell(folderLabel);
-			sheet.addCell(albumLabel);
-			sheet.addCell(titleLabel); 
-			sheet.addCell(trackLabel); 
-			sheet.addCell(artistLabel); 
-			sheet.addCell(genreLabel); 
-			sheet.addCell(yearLabel); 
-			
-			recurrentWrite(sheet, folder);
-			workbook.write(); 
-			workbook.close();
-		} catch(Exception e) {}		
-	}
-	
-	public static void recurrentWrite(WritableSheet sheet, File folder) {
-		String albumName = folder.getName();
+	public static void recursiveExtract(File folder) {
 		File[] listOfFiles = folder.listFiles();
-		String trackName;
 		
 		for (int i = 0; i < listOfFiles.length; i++) {
 			
 			if (listOfFiles[i].isDirectory()) {
-//				albumCount++;
-//				writeAlbumMetadata(albumName, sheet, albumCount, fileCount);
-				recurrentWrite(sheet, listOfFiles[i]);
+				recursiveExtract(listOfFiles[i]);
 			} else {
-				trackName = getFileName(listOfFiles[i]);
-				if(trackName != null && isMp3File(trackName)) {
-					count++;
-					writeTrackMetadata(listOfFiles[i], albumName, trackName, sheet, count);
-				}
+				extractTrackMetadata(listOfFiles[i]);
 			}
 		}		
 	}
 	
-	public static void writeAlbumMetadata(String albumName, WritableSheet sheet, int count) {
-		
-	}
-	
-	public static void writeTrackMetadata(File trackFile, String albumName, String trackName, WritableSheet sheet, int count) {
-		String title="", album="", genre="", artist="", year="", track="", name="";
-//		System.out.println();
+	public static void extractTrackMetadata(File trackFile) {
 		
 		try {
-			System.out.println("writing: "+trackFile.getAbsolutePath()+"\tcount: "+count);
-			AudioFile audioFile = AudioFileIO.read(trackFile);
-			Tag tag = audioFile.getTag();
-			name = trackFile.getName();
-//			System.out.println("name: "+name);
-			if(tag != null) {
-//				System.out.println(trackFile.getAbsolutePath()+"\t count: "+tag.getFieldCount());
+			System.out.println("writing: " + trackFile.getAbsolutePath());
+			
+			String fileName = trackFile.getName();
+			String folderName = getFolderNameAsAlbumName(trackFile);
+			
+			if(isMp3File(fileName)) {
+				AudioFile audioFile = AudioFileIO.read(trackFile);
+				Tag tag = audioFile.getTag();
 				
-				album = tag.getFirst(FieldKey.ALBUM);
-				title = tag.getFirst(FieldKey.TITLE);
-				track = tag.getFirst(FieldKey.TRACK);
-				artist = tag.getFirst(FieldKey.ARTIST);
-				genre = tag.getFirst(FieldKey.GENRE);
-				year = tag.getFirst(FieldKey.YEAR);	
+				TrackMetaData trackData = new TrackMetaData();
+				if(tag != null) {
+					
+					trackData.setAlbum(tag.getFirst(FieldKey.ALBUM));
+					trackData.setTitle(tag.getFirst(FieldKey.TITLE));
+					trackData.setTrack(tag.getFirst(FieldKey.TRACK));
+					trackData.setArtist(tag.getFirst(FieldKey.ARTIST));
+					trackData.setGenre(tag.getFirst(FieldKey.GENRE));
+					trackData.setYear(tag.getFirst(FieldKey.YEAR));	
+					trackData.setOriginalFileName(fileName);
+					trackData.setOriginalFolderName(folderName);
+					
+				}
 				
+				existingTrackList.add(trackData);
+				System.out.println(trackData);
 			}
 			
-			Label nameLabel = new Label(FILE_NAME, count, name); 
-			Label folderLabel = new Label(FOLDER_NAME, count, albumName); 
-			Label albumLabel = new Label(ALBUM, count, album); 
-			Label titleLabel = new Label(TITLE, count, title);
-			Label trackLabel = new Label(TRACK, count, track);
-			Label artistLabel = new Label(ARTIST, count, artist);
-			Label genreLabel = new Label(GENRE, count, genre);
-			Label yearLabel = new Label(YEAR, count, year);
-			
-			sheet.addCell(nameLabel);
-			sheet.addCell(folderLabel);
-			sheet.addCell(albumLabel);
-			sheet.addCell(titleLabel); 
-			sheet.addCell(trackLabel); 
-			sheet.addCell(artistLabel); 
-			sheet.addCell(genreLabel); 
-			sheet.addCell(yearLabel); 
-			
-		} catch (InvalidAudioFrameException iafe) {
-			iafe.printStackTrace();
+		} catch (InvalidAudioFrameException e) {
+			e.printStackTrace();
 		} catch (CannotReadException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TagException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ReadOnlyFileException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -225,37 +188,25 @@ public class Work implements Constants{
 		return false;
 	}
 	
-	public static String getFileName(File file) {
-		String fileName;		
-		
-		if(file.isDirectory())
-			return null;
-		else {
-			fileName = file.getName();
-//			fileName = filePath.substring(filePath.lastIndexOf(SLASH) + 1);
-			return fileName;
-		}
-			
-	}
 	
-	public static void printFileList(File folder) {
+	
+	public static void recurrentTagUpdateCommit(File folder) {
 		File[] listOfFiles = folder.listFiles();
 		
 		for (int i = 0; i < listOfFiles.length; i++) {
 			try {
 				if (listOfFiles[i].isFile()) {
-					sb.append(listOfFiles[i].getAbsolutePath());
-					path = sb.toString();
-					fileName = sb.substring(sb.lastIndexOf("\\") + 1);
-					sb.setLength(sb.lastIndexOf("\\"));
-					albumName = sb.substring(sb.lastIndexOf("\\") + 1);
+					
+					albumName = getFolderNameAsAlbumName(listOfFiles[i]);
+					trackName = getFileNameAsTrackTitle(listOfFiles[i]);
 					// System.out.println("-F- "
 					// +listOfFiles[i].getAbsolutePath().substring(listOfFiles[i].getAbsolutePath().lastIndexOf("\\")+1));
 					System.out.println("-F- " + albumName + " # " + fileName);
 					
 					if(fileName.endsWith("mp3") || fileName.endsWith("MP3")) {
 						
-						if(LoadData.data.containsKey(albumName) && (!"".equalsIgnoreCase(LoadData.data.get(albumName)))) {
+						if(LoadData.data.containsKey(albumName) 
+								&& (!"".equalsIgnoreCase(LoadData.data.get(albumName)))) {
 							artistName = LoadData.data.get(albumName);
 						} else {
 							artistName = albumName;
@@ -271,26 +222,21 @@ public class Work implements Constants{
 					}
 					
 				} else if (listOfFiles[i].isDirectory()) {
-					printFileList(listOfFiles[i]);
+					recurrentTagUpdateCommit(listOfFiles[i]);
 					// System.out.println("-D- "
 					// +listOfFiles[i].getAbsolutePath());
 				}
 			} catch (InvalidAudioFrameException iafe) {
 				iafe.printStackTrace();
 			} catch (CannotReadException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (TagException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ReadOnlyFileException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (CannotWriteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -298,6 +244,23 @@ public class Work implements Constants{
 		}
 		
 	}
+
+	private static String getFolderNameAsAlbumName(File file) {
+
+		String absPath = file.getAbsolutePath();
+		absPath.substring(0, absPath.lastIndexOf("\\"));
+		return absPath.substring(absPath.lastIndexOf("\\"));
 		
+	}
+	
+	private static String getFileNameAsTrackTitle(File file) {
+		return file.getName();
+	}
+
+	public static String getTimestamp() {
+		SimpleDateFormat dt1 = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		String ts = dt1.format(Calendar.getInstance().getTime());
+		return ts;
+	}
 	
 }
