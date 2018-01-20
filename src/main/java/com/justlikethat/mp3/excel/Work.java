@@ -1,17 +1,11 @@
 package com.justlikethat.mp3.excel;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jaudiotagger.audio.AudioFile;
@@ -43,9 +37,14 @@ public class Work implements Constants{
 	
 	public static void main(String s[]) {
 		File folder = new File("D:\\documents\\music");
-		initializeWorkBook();
-		recursiveExtract(folder);
-		writeDataToSheet();
+		
+		try {
+			recursiveExtract(folder);
+			writeDataToSheet();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		System.out.println("-- end --");
 	}
 	
@@ -58,69 +57,11 @@ public class Work implements Constants{
 		}
 	}
 	
-	static void initializeWorkBook() {
-		try {
-	        workBook = new HSSFWorkbook();
-	        sheet = workBook.createSheet("MetadataInfo");
-
-	        sheet.setColumnWidth(0, 30*256);
-	        sheet.setColumnWidth(1, 50*256);
-	        sheet.setColumnWidth(2, 5*256);
-	        sheet.setColumnWidth(3, 30*256);
-	        sheet.setColumnWidth(4, 40*256);
-	        sheet.setColumnWidth(5, 50*256);
-	        
-	        Row titleRow = sheet.createRow(0);
-	        titleRow.setHeightInPoints(45);
-	        Cell cell;
-	        int count = 0;
-	        for(Constants.METADATA metadata : Constants.METADATA.values()) {
-	        	
-	        	cell = titleRow.createCell(count);
-	        	cell.setCellValue(metadata.name());
-	        	count++;
-	        }
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	static void writeDataToSheet() {
-		try {
-			
-			Cell cell;
-			int count = 1;
-			for(TrackMetaData data : existingTrackList) {
-				System.out.println(data);
-				Row row = sheet.createRow(count);
-				cell = row.createCell(0);
-				cell.setCellValue(data.getAlbum());
-				cell = row.createCell(1);
-				cell.setCellValue(data.getTitle());
-				cell = row.createCell(2);
-				cell.setCellValue(data.getTrack());
-				cell = row.createCell(3);
-				cell.setCellValue(data.getArtist());
-				cell = row.createCell(4);
-				cell.setCellValue(data.getGenre());
-				cell = row.createCell(5);
-				cell.setCellValue(data.getYear());
-				cell = row.createCell(6);
-				cell.setCellValue(data.getOriginalFileName());
-				cell = row.createCell(7);
-				cell.setCellValue(data.getOriginalFolderName());
-				count++;
-			}
-			
-			String file = "current_track_data_" + getTimestamp() + ".xls";
-	        FileOutputStream out = new FileOutputStream(file);
-	        workBook.write(out);
-	        out.close();
-			
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+	static void writeDataToSheet() throws IOException {
+		
+		ExcelAbstract<TrackMetaData> absExcel = new ExcelMP3InfoImpl();
+		absExcel.process("current_tracks", existingTrackList);
+		
 	}
 	
 	public static void recursiveExtract(File folder) {
@@ -257,10 +198,6 @@ public class Work implements Constants{
 		return file.getName();
 	}
 
-	public static String getTimestamp() {
-		SimpleDateFormat dt1 = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		String ts = dt1.format(Calendar.getInstance().getTime());
-		return ts;
-	}
+	
 	
 }
