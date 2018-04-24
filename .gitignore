@@ -4,3 +4,7 @@ bin
 .classpath
 *.xls
 /target/
+/Scan_2.jpg
+/Scan_2.pdf
+/Scan_2_v2.pdf
+/app.log
