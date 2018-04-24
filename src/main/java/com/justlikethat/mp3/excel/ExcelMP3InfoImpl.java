@@ -43,7 +43,9 @@ public class ExcelMP3InfoImpl extends ExcelAbstract<TrackMetaData> {
         sheet.setColumnWidth(2,  5 * 256);
         sheet.setColumnWidth(3, 30 * 256);
         sheet.setColumnWidth(4, 40 * 256);
-        sheet.setColumnWidth(5, 50 * 256);
+        sheet.setColumnWidth(5,  5 * 256);
+        sheet.setColumnWidth(6, 40 * 256);
+        sheet.setColumnWidth(7, 50 * 256);
 		
 	}
 
