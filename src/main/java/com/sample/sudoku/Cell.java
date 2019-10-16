@@ -2,7 +2,7 @@ package com.sample.sudoku;
 
 
 public class Cell {
-	
+	private int[] xy;
 	private int[] elements;
 	private int maxSize;
 	private boolean isSolved;
@@ -28,9 +28,10 @@ public class Cell {
 			elements[i] = i+1;
 		}
 		setChanged(true);
+		xy = new int[2];
 	}
 	
-	public void setValue(int value) {
+	public void setValue(int x, int y, int value) {
 		elements[0] = value;
 		for(int i=1; i<maxSize; i++) {
 			elements[i] = 0;
@@ -38,6 +39,8 @@ public class Cell {
 		setSolved(true);
 		setChanged(true);
 		setSize(1);
+		xy[0] = x;
+		xy[1] = y;
 	}
 	
 	public void setSize(int size) {
@@ -72,8 +75,8 @@ public class Cell {
 	
 	public void removeElement(int element) throws Exception{
 		
-		if(getSize()==1) 
-			throw new Exception("this element ["+element+"] shoould not be deleted");
+		if(getSize()==1 && getFinalValue()==element) 
+			throw new Exception("this element ["+element+"] shoould not be deleted at (" + xy[0] + "," + xy[1] + ")");
 		
 		for(int i=0; i<maxSize; i++) {
 			if(elements[i] == element) {

@@ -53,6 +53,7 @@ abstract class ExcelAbstract<T> {
 	
 	public void process(String fileName, List<T> dataList) throws IOException {
 		init();
+		createHeader();
 		processData(fileName, dataList);
 		writeAndClose();
 		
@@ -63,8 +64,6 @@ abstract class ExcelAbstract<T> {
 		String ts = dt1.format(Calendar.getInstance().getTime());
 		return ts;
 	}
-
-	
 
 
 }

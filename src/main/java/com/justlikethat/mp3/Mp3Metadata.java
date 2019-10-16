@@ -21,7 +21,6 @@ public class Mp3Metadata {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		try{
 			AudioFile f = AudioFileIO.read(new File("C:\\Users\\Hello\\Music\\English\\Aqua - Aquarium\\Barbie Girl.mp3"));
 			Tag tag = f.getTag();
@@ -37,19 +36,14 @@ public class Mp3Metadata {
 		} catch(InvalidAudioFrameException iafe) {
 			iafe.printStackTrace();
 		} catch (CannotReadException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TagException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ReadOnlyFileException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CannotWriteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

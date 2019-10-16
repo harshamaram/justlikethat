@@ -36,10 +36,10 @@ public class Work implements Constants{
 	private static List<TrackMetaData> existingTrackList = new ArrayList<TrackMetaData>();
 	
 	public static void main(String s[]) {
-		File folder = new File("D:\\documents\\music");
+		File folder = new File("C:\\data\\music\\Telugu\\Swathi Muthyam");
 		
 		try {
-			recursiveExtract(folder);
+			recursiveProcess(folder);
 			writeDataToSheet();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -64,15 +64,17 @@ public class Work implements Constants{
 		
 	}
 	
-	public static void recursiveExtract(File folder) {
+	public static void recursiveProcess(File folder) {
 		File[] listOfFiles = folder.listFiles();
 		
 		for (int i = 0; i < listOfFiles.length; i++) {
 			
 			if (listOfFiles[i].isDirectory()) {
-				recursiveExtract(listOfFiles[i]);
+				recursiveProcess(listOfFiles[i]);
 			} else {
-				extractTrackMetadata(listOfFiles[i]);
+				if(isMp3File(listOfFiles[i])) {
+					extractTrackMetadata(listOfFiles[i]);
+				}
 			}
 		}		
 	}
@@ -122,14 +124,30 @@ public class Work implements Constants{
 		}
 	}
 	
-	public static boolean isMp3File(String fileName) {
-		if(fileName.endsWith(mp3) || fileName.endsWith(MP3)) {
-			return true;
+	public static void tagUpdater(File mp3File) {
+		try {
+			AudioFile f = AudioFileIO.read(mp3File);
+			Tag tag = f.getTag();
+			tag.setField(FieldKey.TITLE, fileName);
+			tag.setField(FieldKey.ALBUM, albumName);
+			tag.setField(FieldKey.ARTIST, artistName);
+			f.commit();
+		} catch (InvalidAudioFrameException e) {
+			e.printStackTrace();
+		} catch (CannotReadException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TagException e) {
+			e.printStackTrace();
+		} catch (ReadOnlyFileException e) {
+			e.printStackTrace();
+		} catch (CannotWriteException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		return false;
 	}
-	
-	
 	
 	public static void recurrentTagUpdateCommit(File folder) {
 		File[] listOfFiles = folder.listFiles();
@@ -167,8 +185,8 @@ public class Work implements Constants{
 					// System.out.println("-D- "
 					// +listOfFiles[i].getAbsolutePath());
 				}
-			} catch (InvalidAudioFrameException iafe) {
-				iafe.printStackTrace();
+			} catch (InvalidAudioFrameException e) {
+				e.printStackTrace();
 			} catch (CannotReadException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -185,12 +203,23 @@ public class Work implements Constants{
 		}
 		
 	}
+	
+	public static boolean isMp3File(File file) {
+		return isMp3File(file.getName());
+	}
+	
+	public static boolean isMp3File(String fileName) {
+		if(fileName.endsWith(mp3) || fileName.endsWith(MP3)) {
+			return true;
+		}
+		return false;
+	}
 
 	private static String getFolderNameAsAlbumName(File file) {
 
 		String absPath = file.getAbsolutePath();
-		absPath.substring(0, absPath.lastIndexOf("\\"));
-		return absPath.substring(absPath.lastIndexOf("\\"));
+		absPath = absPath.substring(0, absPath.lastIndexOf(File.separator));
+		return absPath.substring(absPath.lastIndexOf(File.separator) + 1);
 		
 	}
 	

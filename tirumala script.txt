@@ -1,0 +1,10 @@
+srivariseva.tirumala.org
+
+once logged in, on parakamani for submission page, use the below script using chrome console
+
+$("#ContentPlaceHolder1_rdb_NumberOfDays_0").attr('checked', true)
+$("#ContentPlaceHolder1_rdb_BatchNo_1").attr('checked', true)
+$("#ContentPlaceHolder1_txt_FromDate").val("25/01/2019")
+$("#lbl_ToDate").text("27/01/2019")
+$("#form1").submit()
+
