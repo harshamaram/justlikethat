@@ -1,3 +1,6 @@
+' how to run?
+' open powershell
+' vscript <filename>
 set WshShell = WScript.CreateObject("WScript.Shell")
 DO 
 WScript.Sleep 60000 
