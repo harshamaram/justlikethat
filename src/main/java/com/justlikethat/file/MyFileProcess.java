@@ -234,7 +234,6 @@ public class MyFileProcess {
 			this.extension = extension.toLowerCase();
 		}
 
-		@Override
 		public boolean accept(File dir, String name) {
 			return name.toLowerCase().endsWith(extension);
 		}

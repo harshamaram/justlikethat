@@ -1,10 +1,3 @@
-
 .settings
-.project
+target
 .classpath
-*.xls
-*.log
-/target/
-/*/target/
-/bin/
-output*txt

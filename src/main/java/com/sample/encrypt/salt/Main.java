@@ -5,8 +5,9 @@ import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
 public class Main {
 	public static void main(String s[]) throws Exception {
@@ -24,14 +25,17 @@ class SimpleProtector {
 
 	private static final String ALGORITHM = "AES";
 	private static final byte[] keyValue = "ThisIsASecretKey".getBytes();
-
+	private static final Encoder encoder = Base64.getEncoder();
+	private static final Decoder decoder = Base64.getDecoder();
+	
 	public static String encrypt(String valueToEnc) throws Exception {
 		Key key = generateKey();
 		
 		Cipher c = Cipher.getInstance(ALGORITHM);
 		c.init(Cipher.ENCRYPT_MODE, key);
 		byte[] encValue = c.doFinal(valueToEnc.getBytes());
-		String encryptedValue = new BASE64Encoder().encode(encValue);
+		
+		String encryptedValue = encoder.encodeToString(encValue);
 		return encryptedValue;
 	}
 
@@ -39,7 +43,7 @@ class SimpleProtector {
 		Key key = generateKey();
 		Cipher c = Cipher.getInstance(ALGORITHM);
 		c.init(Cipher.DECRYPT_MODE, key);
-		byte[] decordedValue = new BASE64Decoder().decodeBuffer(encryptedValue);
+		byte[] decordedValue = decoder.decode(encryptedValue);
 		byte[] decValue = c.doFinal(decordedValue);
 		String decryptedValue = new String(decValue);
 		return decryptedValue;
