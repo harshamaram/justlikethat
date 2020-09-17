@@ -18,6 +18,7 @@ public class FolderToFlatFile {
 		FolderToFlatFile job = new FolderToFlatFile();
 		if(rootFolder.exists()) {
 			if(job.isAllowedFolder(rootFolder)) {
+				System.out.println("Recursing over: " + rootFolder.getAbsolutePath());
 				job.recurse(rootFolder);
 			}
 		} else {
@@ -29,8 +30,10 @@ public class FolderToFlatFile {
 	File resultingFile = new File("output.txt");
 
 	void recurse(File file) {
+		
 		process(file);
-		if(! file.isFile()) {
+		if(!file.isFile() && isAllowedFolder(file)) {
+			System.out.println("Recursing over: " + file.getAbsolutePath());
 			File[] fileList = file.listFiles();
 			for (File f : fileList) {
 				recurse(f);
@@ -43,6 +46,10 @@ public class FolderToFlatFile {
 	}
 	
 	void writeToFile(String content) {
+		
+		if (content == null)
+			return;
+		
 		try {
 			FileUtils.writeStringToFile(resultingFile, content, true);
 		} catch(Exception e) {
@@ -51,7 +58,6 @@ public class FolderToFlatFile {
 	}
 	
 	String extract(File file) {
-		System.out.println("Extract: " + file.getAbsolutePath());
 		if(file.isFile()) {
 			return readFile(file);
 		} else {
@@ -60,10 +66,11 @@ public class FolderToFlatFile {
 	}
 	
 	String getChildFolderName(String str) {
-		return str.substring(str.lastIndexOf(File.separator));
+		return str.substring(str.lastIndexOf(File.separator) + File.separator.length());
 	}
 
 	String readFile(File file) {
+		System.out.println("readFile: " + file.getAbsolutePath());
 		if(!isAllowedFileType(file)) {
 			System.out.println("Skipping this file type");
 			return null;
@@ -84,8 +91,10 @@ public class FolderToFlatFile {
 	}
 	
 	String readFolder(File file) {
-		if(!isAllowedFolder(file))
+		System.out.println("readFolder: " + file.getAbsolutePath());
+		if(!isAllowedFolder(file)) {
 			return null;
+		}
 		return getStart(file);
 	}
 	

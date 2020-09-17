@@ -18,6 +18,10 @@ public class Constants {
 			add("class");
 			add("jar");
 			add("zip");
+			add("mp3");
+			add("xlsx");
+			add("xls");
+			
 		}
 	};
 	
