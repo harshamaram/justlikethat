@@ -3,8 +3,6 @@ package com.justlikethat.ytd.client;
 import java.io.File;
 import java.net.URL;
 
-import org.w3c.dom.stylesheets.LinkStyle;
-
 import com.github.axet.vget.VGet;
 
 public class YTD {
