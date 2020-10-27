@@ -7,6 +7,7 @@ javac MyFileProcess.java
 java MyFileProcess REPLACE "D:\Legacy migration\ScriptCare\RxSense_ScriptCare_201907_No_CF.txt" "D:\Legacy migration\ScriptCare\output.txt"
 java MyFileProcess SPLIT "D:\Legacy migration\ScriptCare\RxSense_ScriptCare_201907_No_CF.txt" 15000
 java MyFileProcess SPLIT_CONTENT_BASED "D:\Legacy migration\ScriptCare\RxSense_ScriptCare_201907_No_CF.txt" "End Function"
+java MyFileProcess EXTRACT_TOP_ROWS "D:\Legacy migration\ScriptCare\RxSense_ScriptCare_201907_No_CF.txt" 100
 java MyFileProcess MERGE "D:\Legacy migration\ScriptCare" CSV "OUTPUT.XML"
 */
 
@@ -42,6 +43,8 @@ public class MyFileProcess {
 				mergeAllFiles(s);
 			} else if(cmd.equals("SPLIT_CONTENT_BASED")) {
 				splitBasedOnLineContent(s);
+			} else if(cmd.equalsIgnoreCase("EXTRACT_TOP_ROWS")) {
+				extractTopRows(s);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -79,6 +82,45 @@ public class MyFileProcess {
 		
 		bufferedWriter.close();
 		fileWriter.close();
+		
+	}
+	
+	private static void extractTopRows(String[] s) throws IOException {
+		String input = s[1];
+		int rowCount = Integer.parseInt(s[2]);
+
+		File inputFile = new File(input);
+		String fullFileName = inputFile.getAbsolutePath();
+		String fileName = inputFile.getName();
+		fileName = fileName.substring(0, fileName.indexOf("."));
+		
+		String parentFolder = fullFileName.substring(0, fullFileName.lastIndexOf("\\"));
+		
+		String fileExtn = fullFileName.substring(fullFileName.lastIndexOf(".")+1);
+		
+		System.out.println(fullFileName);
+		System.out.println(parentFolder);
+		System.out.println(fileName);
+		System.out.println(fileExtn);
+
+		File output = new File(parentFolder + "\\" + fileName + "_top_" + rowCount + "." + fileExtn);
+		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+
+		String str;
+		
+		while ((str = reader.readLine()) != null
+				&& rowCount-- > 0) {
+			writer.write(str);
+			writer.write("\n");
+			
+		}
+		
+		if(writer != null) {
+			writer.close();
+		}
+		
+		reader.close();
 		
 	}
 	
