@@ -1,0 +1,10 @@
+network share
+
+windows & Ubuntu
+
+Share a folder on windows as follows:
+\\LAPTOP-UDTGF86I\Tanvi2021
+
+access from ubuntu as follows
+smb://LAPTOP-UDTGF86I/Tanvi2021 (user / default domain name: user / password)
+

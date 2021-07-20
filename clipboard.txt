@@ -1,4 +1,0 @@
-spring.security.oauth2.client.registration.okta.clientId=0oad827q2Gx7BIbKq4x6
-spring.security.oauth2.client.registration.okta.clientSecret=z4dAjxQd9HPLl4vmrJPDwmVtF3iwY7jSvhMMLk63
-spring.security.oauth2.client.registration.okta.clientName=Okta
-spring.security.oauth2.client.provider.okta.issuerUri=https://dev-590137.okta.com/oauth2/default

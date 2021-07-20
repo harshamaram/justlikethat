@@ -53,7 +53,7 @@ class Constants {
 public class FolderToFlatFile {
 	
 	public static String ROOT_FOLDER_STR;
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		args = new String[1];
 		args[0] = "/home/harsha/data/git/justlikethat";
 		if(args.length != 1) {
