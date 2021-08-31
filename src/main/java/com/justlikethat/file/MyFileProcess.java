@@ -17,6 +17,9 @@ public class MyFileProcess {
 	public static void main(String s[]) {
 
 		if(s == null || s.length == 0) {
+			displayUsage();
+			return;
+			/*
 			s = new String[7];
 			s[0] = "INJECT_DELIMITERS";
 			s[1] = "input.txt";
@@ -51,36 +54,33 @@ public class MyFileProcess {
 	}
 
 	private static final String USAGE_REPLACE =
-			"REPLACE: Replaces in given {source-file} by {source-string} with {target-string} in each line of the file\n" +
-			"Required: source-file\n" +
-			"Required: source-string\n" +
-			"Required: target-string\n\t";
+			"\tREPLACE {source-file} {source-string} {target-string}\n" +
+			"\t\tReplaces in given {source-file} by {source-string} with {target-string} in each line of the file\n";
+
 	private static final String USAGE_SPLIT =
-			"SPLIT: splits a give {source-file} into multiple lines - each separated by {line-count}\n" +
-			"Required: source-file\n" +
-			"Required: line-count\n\t";
+			"\tSPLIT {source-file} {line-count}\n"+
+			"\t\tSplits a give {source-file} into multiple lines - each separated by {line-count}\n";
+
 	private static final String USAGE_SPLIT_CONTENT_BASED =
-			"SPLIT_CONTENT_BASED: splits a give {source-file} into multiple files - each separated by {indentifier-text}\n" +
-			"Required: source-file\n" +
-			"Required: indentifier-text\n\t";
+			"\tSPLIT_CONTENT_BASED {source-file} {identifier-text}\n" +
+			"\t\tSplits a give {source-file} into multiple files - each separated by {indentifier-text}\n";
+
 	private static final String USAGE_EXTRACT_TOP_ROWS =
-			"EXTRACT_TOP_ROWS: extracts top {line-count} lines from given {source-file}\n" +
-			"Required: source-file\n" +
-			"Requried: line-count\n\t";
+			"\tEXTRACT_TOP_ROWS {line-count} lines from given {source-file}\n" +
+			"\t\textracts top {line-count} lines from given {source-file}\n";
+
 	private static final String USAGE_MERGE =
-			"MERGE: merges all files with given {extension} in given {folder-location} and writes the result to {output-file}\n" +
-			"Required: folder-location\n" +
-			"Required: extention\n" +
-			"Required: output-file\n\t";
+			"\tMERGE {folder-location} {extension} {output-file}\n" +
+			"\t\tmerges all files with given {extension} in given {folder-location} and writes the result to {output-file}\n";
+
 	private static final String USAGE_INJECT_DELIMITERS =
-			"\tINJECT_DELIMITERS: addes given {delimiter} at {indexes} to each line to file {input-file} \n" +
-			"Required: input-file\n" +
-			"Required: delimitter\n" +
-			"Required: indexes (1 or more separated by space)\n";
+			"\tINJECT_DELIMITERS {input-file} {delimiter} at {index}+\n" +
+			"\t\tAddes given {delimiter} at {index} to each line to file {input-file} \n" +
+			"\t\t{index} can be 1 or more separated by space)\n";
 
 	private static void displayUsage() {
 		System.out.println(
-				"java MyFileProcess <COMMAND> [ARGUMENTS]\n\t"
+				"java MyFileProcess <COMMAND> [ARGUMENTS]\n"
 						+ USAGE_REPLACE
 						+ USAGE_SPLIT
 						+ USAGE_SPLIT_CONTENT_BASED
