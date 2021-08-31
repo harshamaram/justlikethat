@@ -30,8 +30,8 @@ public class LoadData {
 			while (iterator.hasNext()) {
 
 				Row currentRow = iterator.next();
-				Cell cell1 = currentRow.getCell(0, Row.RETURN_BLANK_AS_NULL);
-				Cell cell2 = currentRow.getCell(1, Row.RETURN_BLANK_AS_NULL);
+				Cell cell1 = currentRow.getCell(0, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+				Cell cell2 = currentRow.getCell(1, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 				if(cell1 == null || cell2 == null) {
 					continue;
 				}
