@@ -8,34 +8,35 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MyFileProcess {
 
 	public static void main(String s[]) {
 
+			s = new String[4];
+			s[0] = "REPLACE_REGEX";
+			s[1] = "/home/harsha/my-data/git/justlikethat/input.txt";
+			s[2] = "";
+			s[3] = "";
+			//*/
+
 		if(s == null || s.length == 0) {
 			displayUsage();
 			return;
-			/*
-			s = new String[7];
-			s[0] = "INJECT_DELIMITERS";
-			s[1] = "input.txt";
-			s[2] = "\t";
-			s[3] = "5";
-			s[4] = "8";
-			s[5] = "10";
-			s[6] = "15"; //*/
+
 		}
 
 		String cmd = s[0];
 
 		try {
-			if (cmd == "REPLACE") {
+			if (cmd.equals("REPLACE")) {
 				replaceInEachLine(s);
-			} else if (cmd.equals("SPLIT")) {
+			} else if(cmd.equals("REPLACE_REGEX")) {
+				replaceRegexInEachLine(s);
+			} else if (cmd.equals("SPLIT_INTO_FILES")) {
 				splitIntoMultipleFiles(s);
 			} else if (cmd.equals("MERGE")) {
 				mergeAllFiles(s);
@@ -57,9 +58,9 @@ public class MyFileProcess {
 			"\tREPLACE {source-file} {source-string} {target-string}\n" +
 			"\t\tReplaces in given {source-file} by {source-string} with {target-string} in each line of the file\n";
 
-	private static final String USAGE_SPLIT =
-			"\tSPLIT {source-file} {line-count}\n"+
-			"\t\tSplits a give {source-file} into multiple lines - each separated by {line-count}\n";
+	private static final String USAGE_SPLIT_INTO_FILES =
+			"\tSPLIT_INTO_FILES {source-file} {line-count}\n"+
+			"\t\tSplits a give {source-file} into multiple lines - each file containing {line-count} lines\n";
 
 	private static final String USAGE_SPLIT_CONTENT_BASED =
 			"\tSPLIT_CONTENT_BASED {source-file} {identifier-text}\n" +
@@ -74,15 +75,22 @@ public class MyFileProcess {
 			"\t\tmerges all files with given {extension} in given {folder-location} and writes the result to {output-file}\n";
 
 	private static final String USAGE_INJECT_DELIMITERS =
-			"\tINJECT_DELIMITERS {input-file} {delimiter} at {index}+\n" +
-			"\t\tAddes given {delimiter} at {index} to each line to file {input-file} \n" +
+			"\tINJECT_DELIMITERS {input-file} {delimiter} {index}+\n" +
+			"\t\tAdds given {delimiter} at {index} to each line to file {input-file} \n" +
+			"\t\t{index} can be 1 or more separated by space)\n";
+
+	private static final String USAGE_REPLACE_REGEX =
+			"\tREPLACE_REGEX {input-file} {find-regex} {replace-regex}\n" +
+			"\t\tFinds based on {find-regex} and replaces it with {replace-regex} in each line.\n" +
+			"\t\tYou can use groups in regex to make it efficient\n" +
 			"\t\t{index} can be 1 or more separated by space)\n";
 
 	private static void displayUsage() {
 		System.out.println(
 				"java MyFileProcess <COMMAND> [ARGUMENTS]\n"
 						+ USAGE_REPLACE
-						+ USAGE_SPLIT
+						+ USAGE_REPLACE_REGEX
+						+ USAGE_SPLIT_INTO_FILES
 						+ USAGE_SPLIT_CONTENT_BASED
 						+ USAGE_EXTRACT_TOP_ROWS
 						+ USAGE_INJECT_DELIMITERS
@@ -343,6 +351,110 @@ public class MyFileProcess {
 
 		}
 	}
+
+	private static void replaceRegexInEachLine(String[] s) {
+		try {
+
+			if(s == null || s.length != 4) throw new Exception("check usage");
+			String input = s[1]; // N123450000111
+			String findRegex = "(.{6})(.{4})(.{3})"; //s[2];
+			String replaceRegex = "(3)(1)(2)"; //s[3];
+
+			List<Integer> list = getIndexList(replaceRegex);
+			String formattedString = getFormattedString(replaceRegex);
+			// System.out.println(String.format(getFormattedString(replaceRegex), list.toArray()));
+
+			String output = getSuggestedOutputFileName(input);
+
+			BufferedReader reader = new BufferedReader(new FileReader(input));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+
+			String str;
+			String[] tokens;
+			Pattern findPattern = Pattern.compile(findRegex);
+			Matcher m;
+			Map<Integer, String> map = new HashMap<>();
+			List<String> valueList = new ArrayList<>();
+
+			int count;
+
+			while ((str = reader.readLine()) != null) {
+				//writer.write(filter(merge(str.split(source), target)));
+				m = findPattern.matcher(str);
+				m.find();
+				for(int i=0; i<=m.groupCount(); i++) {
+					map.put(i, m.group(i));
+				}
+
+				for(Integer i : list) {
+					valueList.add(map.get(i));
+				}
+
+				writer.write(String.format(formattedString, valueList.toArray()));
+				writer.write("\n");
+
+				map.clear();
+				valueList.clear();
+
+			}
+
+			writer.close();
+			reader.close();
+
+		} catch (Exception e) {
+			System.out.println("Exception in running: " + e.getMessage());
+			e.printStackTrace();
+			System.out.println(
+					USAGE_REPLACE_REGEX);
+		}
+	}
+
+    public static void main2(String s[]) {
+        String str = "abc123def";
+        String regex = "([a-z]*)([0-9]*)([a-z]*)";
+        String replaceRegex = "(1)NEW(3)AND(2)";
+
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(str);
+        boolean r = m.find();
+        Map<Integer, String> map = new HashMap<>();
+        System.out.println("group count: " + m.groupCount());
+        for(int i=0; i<=m.groupCount(); i++) {
+            map.put(i, str.substring(m.start(i), m.end(i)));
+        }
+        System.out.println(map);
+
+        StringBuilder sb = new StringBuilder(str);
+
+        List<Integer> list = getIndexList(replaceRegex);
+        System.out.println(String.format(getFormattedString(replaceRegex), list.toArray()));
+
+        List<String> valueList = new ArrayList<>();
+        for(Integer i : list) {
+            valueList.add(map.get(i));
+        }
+        System.out.println(String.format(getFormattedString(replaceRegex), valueList.toArray()));
+
+    }
+
+    static String findGroupsRegex = "\\((\\d+)\\)";
+
+    static String getFormattedString(String replaceRegex) {
+        String formatted = replaceRegex;
+        formatted = formatted.replaceAll(findGroupsRegex, "%s");
+        return formatted;
+    }
+
+    static List getIndexList(String replaceRegex) {
+        Pattern findGroupsRegexPattern = Pattern.compile(findGroupsRegex);
+        Matcher m = findGroupsRegexPattern.matcher(replaceRegex);
+        List<Integer> list = new ArrayList<>();
+
+        while(m.find()) {
+            list.add(Integer.parseInt(m.group(1)));
+        }
+        return list;
+    }
 
 	private static String getSuggestedOutputFileName(File file) {
 		return getSuggestedOutputFileName(file.getAbsolutePath());
