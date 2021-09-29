@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class MyFileProcess {
 
 	public static void main(String s[]) {
-
+			/*
 			s = new String[4];
 			s[0] = "REPLACE_REGEX";
 			s[1] = "/home/harsha/my-data/git/justlikethat/input.txt";
@@ -26,11 +26,9 @@ public class MyFileProcess {
 		if(s == null || s.length == 0) {
 			displayUsage();
 			return;
-
 		}
 
 		String cmd = s[0];
-
 		try {
 			if (cmd.equals("REPLACE")) {
 				replaceInEachLine(s);
@@ -356,9 +354,9 @@ public class MyFileProcess {
 		try {
 
 			if(s == null || s.length != 4) throw new Exception("check usage");
-			String input = s[1]; // N123450000111
-			String findRegex = "(.{6})(.{4})(.{3})"; //s[2];
-			String replaceRegex = "(3)(1)(2)"; //s[3];
+			String input = s[1];
+			String findRegex = s[2];
+			String replaceRegex = s[3];
 
 			List<Integer> list = getIndexList(replaceRegex);
 			String formattedString = getFormattedString(replaceRegex);
