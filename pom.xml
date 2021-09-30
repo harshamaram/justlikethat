@@ -7,7 +7,7 @@
 	<groupId>com.justlikethat</groupId>
 	<artifactId>justlikethat</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>justlikethat</name>
 
 	<url>http://maven.apache.org</url>
@@ -41,18 +41,6 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>3.17</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.14</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org</groupId>
-			<artifactId>jaudiotagger</artifactId>
-			<version>2.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -103,12 +91,6 @@
 			<artifactId>google-api-services-gmail</artifactId>
 			<version>v1-rev83-1.23.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.17</version>
-		</dependency>
-
 	</dependencies>
 	<build>
 		<plugins>
@@ -132,6 +114,8 @@
 						<descriptorRefs>
 							<descriptorRef>jar-with-dependencies</descriptorRef>
 						</descriptorRefs>
+						<finalName>${artifactId}-bundle-${version}</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
 					</configuration>
 					</execution>
 				</executions>
