@@ -1,5 +1,11 @@
 package com.justlikethat.file;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.github.opendevl.JFlat;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,6 +13,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -44,12 +52,60 @@ public class MyFileProcess {
 				extractTopRows(s);
 			} else if (cmd.equalsIgnoreCase("INJECT_DELIMITERS")) {
 				injectDelimiters(s);
+			} else if (cmd.equalsIgnoreCase("JSON_TO_CSV")) {
+				jsonToCsv(s);
 			} else {
 				displayUsage();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void jsonToCsv(String[] s) throws Exception {
+		if (s.length < 2) {
+			throw new Exception("java MyFileProcess JSON_TO_CSV <FILE_LOCATION>");
+		}
+
+		String fileLoc = s[1];
+		String str = new String(Files.readAllBytes(Paths.get(fileLoc)));
+		String output = getSuggestedOutputFileName(fileLoc);
+
+		JFlat flatMe = new JFlat(str);
+
+		//write the 2D representation in csv format
+		flatMe.write2csv(output);
+
+		/*
+		String fileLoc = s[1];
+
+		File currentFile = new File(fileLoc);
+		File outputFile = new File(getSuggestedOutputFileName(currentFile));
+
+		BufferedReader reader = new BufferedReader(new FileReader(currentFile));
+		FileWriter fileWriter = new FileWriter(outputFile);
+		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+		JsonNode jsonTree = new ObjectMapper().readTree(currentFile);
+
+		CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
+		JsonNode firstObject = jsonTree.elements().next();
+		firstObject.fieldNames().forEachRemaining(
+				fieldName -> {csvSchemaBuilder.addColumn(fieldName);}
+		);
+		CsvSchema csvSchema = csvSchemaBuilder
+				.build()
+				.withHeader();
+
+		CsvMapper csvMapper = new CsvMapper();
+		csvMapper.writerFor(JsonNode.class)
+				.with(csvSchema)
+				.writeValue(outputFile, jsonTree);
+
+		reader.close();
+		bufferedWriter.close();
+		fileWriter.close();
+//*/
 	}
 
 	private static final String USAGE_REPLACE =
@@ -83,6 +139,10 @@ public class MyFileProcess {
 			"\t\tYou can use groups in regex to make it efficient\n" +
 			"\t\t{index} can be 1 or more separated by space)\n";
 
+	private static final String USAGE_JSON_TO_CSV =
+			"\tJSON_TO_CSV {input-file}\n" +
+					"\t\tConverts {find-regex} file to csv formatted file\n";
+
 	private static void displayUsage() {
 		System.out.println(
 				"java MyFileProcess <COMMAND> [ARGUMENTS]\n"
@@ -93,6 +153,7 @@ public class MyFileProcess {
 						+ USAGE_EXTRACT_TOP_ROWS
 						+ USAGE_INJECT_DELIMITERS
 						+ USAGE_MERGE
+						+ USAGE_JSON_TO_CSV
 		);
 	}
 
@@ -132,20 +193,16 @@ public class MyFileProcess {
 	private static String addIndexes(String str, String delim, int[] indexes) {
 
 		int start = 0;
-		List<String> tokens = new ArrayList<>();
-
+		StringBuffer buff = new StringBuffer();
 		for (int i = 0; i < indexes.length; i++) {
-			tokens.add(str.substring(start, indexes[i]));
+			if(indexes[i] > str.length() -1) {
+				break;
+			}
+			buff.append(str.substring(start, indexes[i]))
+							.append(delim);
 			start = indexes[i];
 		}
-
-		tokens.add(str.substring(start));
-
-		StringBuffer buff = new StringBuffer();
-		for (String s : tokens) {
-			buff.append(s).append(delim);
-		}
-		buff.setLength(buff.length() - 1);
+		buff.append(str.substring(start));
 		return buff.toString();
 	}
 
