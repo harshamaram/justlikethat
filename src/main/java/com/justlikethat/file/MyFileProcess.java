@@ -6,13 +6,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.github.opendevl.JFlat;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -50,7 +44,9 @@ public class MyFileProcess {
 				splitBasedOnLineContent(s);
 			} else if (cmd.equalsIgnoreCase("EXTRACT_TOP_ROWS")) {
 				extractTopRows(s);
-			} else if (cmd.equalsIgnoreCase("INJECT_DELIMITERS")) {
+			} else if(cmd.equalsIgnoreCase("EXTRACT_ROWS_AFTER")) {
+                extractRowsAfter(s);
+            } else if (cmd.equalsIgnoreCase("INJECT_DELIMITERS")) {
 				injectDelimiters(s);
 			} else if (cmd.equalsIgnoreCase("JSON_TO_CSV")) {
 				jsonToCsv(s);
@@ -121,8 +117,12 @@ public class MyFileProcess {
 			"\t\tSplits a give {source-file} into multiple files - each separated by {indentifier-text}\n";
 
 	private static final String USAGE_EXTRACT_TOP_ROWS =
-			"\tEXTRACT_TOP_ROWS {line-count} lines from given {source-file}\n" +
+			"\tEXTRACT_TOP_ROWS {source-file} {line-count}\n" +
 			"\t\textracts top {line-count} lines from given {source-file}\n";
+
+    private static final String USAGE_EXTRACT_ROWS_AFTER =
+            "\tEXTRACT_ROWS_AFTER {source-file} {start-index} {line-count}\n" +
+                    "\t\textracts top {line-count} lines from given {source-file}\n";
 
 	private static final String USAGE_MERGE =
 			"\tMERGE {folder-location} {extension} {output-file}\n" +
@@ -136,8 +136,7 @@ public class MyFileProcess {
 	private static final String USAGE_REPLACE_REGEX =
 			"\tREPLACE_REGEX {input-file} {find-regex} {replace-regex}\n" +
 			"\t\tFinds based on {find-regex} and replaces it with {replace-regex} in each line.\n" +
-			"\t\tYou can use groups in regex to make it efficient\n" +
-			"\t\t{index} can be 1 or more separated by space)\n";
+			"\t\tSupports regex groupings\n";
 
 	private static final String USAGE_JSON_TO_CSV =
 			"\tJSON_TO_CSV {input-file}\n" +
@@ -151,6 +150,7 @@ public class MyFileProcess {
 						+ USAGE_SPLIT_INTO_FILES
 						+ USAGE_SPLIT_CONTENT_BASED
 						+ USAGE_EXTRACT_TOP_ROWS
+                        + USAGE_EXTRACT_ROWS_AFTER
 						+ USAGE_INJECT_DELIMITERS
 						+ USAGE_MERGE
 						+ USAGE_JSON_TO_CSV
@@ -238,6 +238,45 @@ public class MyFileProcess {
 		fileWriter.close();
 
 	}
+
+    public static void extractRowsAfter(String s[]) throws IOException {
+		String input = s[1];
+		int startIndex = Integer.parseInt(s[2]);
+		int rowCount = Integer.parseInt(s[3]);
+
+		File inputFile = new File(input);
+		String fullFileName = inputFile.getAbsolutePath();
+		String fileName = inputFile.getName();
+		fileName = fileName.substring(0, fileName.indexOf("."));
+
+		String fileExtn = getFileExtension(inputFile);
+
+		System.out.println(fullFileName);
+		System.out.println(fileName);
+
+		File output = new File(getParentFolderName(inputFile) + File.separator + fileName + "_top_" + rowCount + "." + fileExtn);
+		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+
+		while (reader.readLine() != null
+				&& startIndex-- > 0) {
+			continue;
+		}
+
+		String str;
+		while ((str = reader.readLine()) != null
+				&& rowCount-- > 0) {
+			writer.write(str);
+			writer.write("\n");
+		}
+
+		if (writer != null) {
+			writer.close();
+		}
+
+		reader.close();
+
+    }
 
 	private static void extractTopRows(String[] s) throws IOException {
 		String input = s[1];
