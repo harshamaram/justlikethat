@@ -1,9 +1,11 @@
 package com.justlikethat.file;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+/*
+javac -d . MyFileProcess.java
+jar cvfe my-file-processor.jar com.justlikethat.file.MyFileProcess com
+java -jar my-file-processor.jar <parameters..>
+ */
+
 import com.github.opendevl.JFlat;
 
 import java.io.*;

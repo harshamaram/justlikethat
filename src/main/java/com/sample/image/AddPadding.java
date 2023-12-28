@@ -1,7 +1,14 @@
+/*
+javac -d . AddPadding.java
+jar cvfe addpadding.jar com.sample.image.AddPadding com
+java -jar addpadding.jar <parameters..>
+ */
+
 package com.sample.image;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 
@@ -13,10 +20,14 @@ public class AddPadding {
 			// return;
 			s = new String[5];
 			s[0] = "SAMPLE-IMAGE.jpg";
-			s[1] = "1.25x";
-			s[2] = "1.25x";
-			s[3] = "1.25x";
-			s[4] = "1.25x";
+//			s[1] = ".25x";
+//			s[2] = ".25x";
+//			s[3] = ".25x";
+//			s[4] = ".50x";
+			s[1] = "500";
+			s[2] = "500";
+			s[3] = "500";
+			s[4] = "500";
 		}
 		new AddPadding().letsTry(s[0], s[1], s[2], s[3], s[4]);
 	}
@@ -50,7 +61,8 @@ public class AddPadding {
 				rightx = Double.parseDouble(right.replace("x", ""));
 				topx = Double.parseDouble(top.replace("x", ""));
 				bottomx = Double.parseDouble(bottom.replace("x", ""));
-				System.out.printf("Padding multipliers identified: left: %d, top: %d, right: %d, bottom: %d\n", leftx, topx, rightx, bottomx);
+				System.out.printf("Padding multipliers identified: left: %.2f, top: %.2f, right: %.2f, bottom: %.2f\n",
+						leftx, topx, rightx, bottomx);
 
 				newWidth = (int) (w + w*leftx + w*rightx);
 				newHeight = (int) (h + h*topx + h*bottomx);
@@ -83,13 +95,16 @@ public class AddPadding {
 			g.drawImage(image, imagex, imagey, null);
 			g.dispose();
 			
-			File newImageFile = new File("SAMPLE-IMAGE-02.jpg");
+			File newImageFile = new File("RESULT-"
+					+ String.format("%2d%2d",
+						Calendar.getInstance().get(Calendar.MINUTE),
+						Calendar.getInstance().get(Calendar.SECOND))
+					+".jpg");
 			ImageIO.write(newImage, "jpg", newImageFile);
 			
 		} catch(Exception e) {
 			System.out.println("Error occurred: " + e.getMessage());
 		}
 	}
-	
 
 }
