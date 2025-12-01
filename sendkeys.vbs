@@ -5,8 +5,11 @@
 
 set WshShell = WScript.CreateObject("WScript.Shell")
 DO 
-WScript.Sleep 60000 
+Dim randNum, min, max
+min = 90
+max = 172
+randNum = Int((max-min)*Rand + min) * 1000
+WScript.Sleep randNum 
 WshShell.sendKeys "{SCROLLLOCK}"
 WshShell.sendKeys "{SCROLLLOCK}" 
 LOOP 
-
